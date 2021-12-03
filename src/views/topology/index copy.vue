@@ -1,7 +1,7 @@
 <!--
  * @FilePath src/views/topology/index.vue
  * @Created Bay丶<baizhanying@autobio.com.cn> 2021-11-19 15:07:30
- * @Modified Bay丶<baizhanying@autobio.com.cn> 2021-11-24 14:56:56
+ * @Modified Bay丶<baizhanying@autobio.com.cn> 2021-11-25 17:52:38
  * @Description https://codepen.io/Chieffo/pen/oNjPdwz?editors=1010
 -->
 
@@ -21,6 +21,9 @@ export default {
       diagram: null,
       topologyData: {
         nodeDataArray: [
+          { category: 'person', key: 'A3245', name: 'A 3245', source: 'https://cdn2.thecatapi.com/images/7h6.gif' },
+          { category: 'person', key: 'A3246', name: 'A 3246', source: 'https://cdn2.thecatapi.com/images/II5NfWqR2.jpg' },
+          { category: 'person', key: 'A3247', name: 'A 3247', source: 'https://cdn2.thecatapi.com/images/aqq.jpg' },
           {
             key: 'root',
             group: '',
@@ -598,6 +601,21 @@ export default {
           },
           {
             from: 'root',
+            to: 'A3245',
+            category: 'layerThreeLinkInfo2'
+          },
+          {
+            from: 'root',
+            to: 'A3246',
+            category: 'layerThreeLinkInfo'
+          },
+          {
+            from: 'root',
+            to: 'A3247',
+            category: 'layerThreeLinkInfo'
+          },
+          {
+            from: 'root',
             to: 'DevNull,DevNull',
             category: 'root'
           },
@@ -693,140 +711,125 @@ export default {
       this.diagram.select(this.diagram.findNodeForKey(val.firstDevKey))
     },
     addNodeTemplateMaps() {
+      this.diagram.nodeTemplateMap.add('person', $(go.Node, 'Horizontal', { selectionAdorned: false, background: '#0050db' },
+        $(go.Picture,
+          // Pictures should normally have an explicit width and height.
+          // This picture has a red background, only visible when there is no source set
+          // or when the image is partially transparent.
+          { margin: 10, width: 50, height: 50, background: 'red' },
+          // Picture.source is data bound to the "source" attribute of the model data
+          new go.Binding('source')),
+        $(go.TextBlock,
+          'Default Text', // the initial value for TextBlock.text
+          // some room around the text, a larger font, and a white stroke:
+          { margin: 12, stroke: 'white', font: 'bold 16px sans-serif' },
+          // TextBlock.text is data bound to the "name" property of the model data
+          new go.Binding('text', 'name'))
+      ))
       // 根节点模板（模板是 gojs 提供的控制节点显示样式的 api）
       // 使用 add 方法添加模板，会以方法的第一个参数匹配节点数据的 category 属性，只有匹配的节点模板才生效
-      this.diagram.nodeTemplateMap.add(
-        'root',
-        $(
-          go.Node,
-          'Auto',
-          { selectionAdorned: false },
-          // 图片背景
-          // $(go.Picture, {
-          //   desiredSize: new go.Size(153, 133)
-          //   source: '/static/images/topo-manage/root-icon.svg',
-          // }),
+      this.diagram.nodeTemplateMap.add('root', $(go.Node, 'Auto', { selectionAdorned: false },
+        // 图片背景
+        // $(go.Picture, {
+        //   desiredSize: new go.Size(153, 133)
+        //   source: '/static/images/topo-manage/root-icon.svg',
+        // }),
 
+        // 矩形背景
+        $(go.Shape, 'RoundedRectangle', {
+          width: 153,
+          height: 133,
+          fill: '#001e59',
+          stroke: '#0059db',
+          strokeWidth: 1,
+          parameter1: 4
+        }),
+        // 文字
+        $(go.TextBlock, {
+          margin: new go.Margin(0, 0, 14, 0),
+          stroke: '#fff',
+          font: '14px Microsoft YaHei',
+          alignment: go.Spot.BottomCenter
+        // 使用 Binding 方法绑定 节点数据 到此节点的 某个属性，这里绑定了 text 属性
+        }, new go.Binding('text', '', (model) => model[model.category].name))
+      ))
+
+      // 设备的部门信息节点模板
+      this.diagram.nodeTemplateMap.add('layerTwoNodeInfo', $(go.Node, 'Spot', { selectionAdorned: false },
+        // 节点背景
+        // $(go.Picture, {
+        //   desiredSize: new go.Size(120, 160)
+        //   source: '/static/images/topo-manage/dev-other-bg.svg',
+        // }),
+        // 矩形背景
+        $(go.Shape, 'RoundedRectangle', {
+          width: 120,
+          height: 160,
+          fill: '#001e59',
+          stroke: '#0059db',
+          strokeWidth: 1,
+          parameter1: 4
+        }),
+        $(go.Panel, 'Vertical',
+          // 图标
+          // $(
+          //   go.Picture,
+          //   {
+          //     desiredSize: new go.Size(71, 52)
+          //     source: '/static/images/topo-manage/orgnizInfo-icon.svg',
+          //   }
+          //   new go.Binding('source', '', model => `/static/images/topo-manage/${model[model.category].category}-icon.svg`)
+          // ),
           // 矩形背景
           $(go.Shape, 'RoundedRectangle', {
-            width: 153,
-            height: 133,
-            fill: '#001e59',
-            stroke: '#0059db',
+            width: 71,
+            height: 52,
+            fill: '#0050db',
+            stroke: '#0050db',
             strokeWidth: 1,
             parameter1: 4
           }),
-          // 文字
+          // 台数
+          $(go.Panel, 'Horizontal', {
+            alignment: go.Spot.Center,
+            margin: new go.Margin(4, 0, 0, 0)
+          }, $(go.TextBlock, {
+            margin: new go.Margin(0, 4, 0, 0),
+            stroke: 'white',
+            font: '20px Microsoft YaHei'
+          }, new go.Binding('text', '', (model) => model[model.category].count))),
+          // 名称
           $(
             go.TextBlock,
             {
-              margin: new go.Margin(0, 0, 14, 0),
-              stroke: '#fff',
-              font: '14px Microsoft YaHei',
-              alignment: go.Spot.BottomCenter
+              font: '13px Microsoft YaHei',
+              width: 80,
+              stroke: '#cecece',
+              textAlign: 'center',
+              maxLines: 4,
+              overflow: go.TextBlock.OverflowEllipsis,
+              toolTip: $(
+                'ToolTip',
+                {
+                  'Border.fill': '#021026',
+                  'Border.stroke': '#12409E',
+                  'Border.parameter1': 4
+                },
+                $(
+                  go.TextBlock,
+                  { margin: 4, stroke: 'white' },
+                  new go.Binding(
+                    'text',
+                    '',
+                    (model) => model[model.category].name
+                  )
+                )
+              )
             },
-            // 使用 Binding 方法绑定 节点数据 到此节点的 某个属性，这里绑定了 text 属性
             new go.Binding('text', '', (model) => model[model.category].name)
           )
         )
       )
-
-      // 设备的部门信息节点模板
-      this.diagram.nodeTemplateMap.add(
-        'layerTwoNodeInfo',
-        $(
-          go.Node,
-          'Spot',
-          { selectionAdorned: false },
-          // 节点背景
-          // $(go.Picture, {
-          //   desiredSize: new go.Size(120, 160)
-          //   source: '/static/images/topo-manage/dev-other-bg.svg',
-          // }),
-          // 矩形背景
-          $(go.Shape, 'RoundedRectangle', {
-            width: 120,
-            height: 160,
-            fill: '#001e59',
-            stroke: '#0059db',
-            strokeWidth: 1,
-            parameter1: 4
-          }),
-          $(
-            go.Panel,
-            'Vertical',
-            // 图标
-            // $(
-            //   go.Picture,
-            //   {
-            //     desiredSize: new go.Size(71, 52)
-            //     source: '/static/images/topo-manage/orgnizInfo-icon.svg',
-            //   }
-            //   new go.Binding('source', '', model => `/static/images/topo-manage/${model[model.category].category}-icon.svg`)
-            // ),
-            // 矩形背景
-            $(go.Shape, 'RoundedRectangle', {
-              width: 71,
-              height: 52,
-              fill: '#0050db',
-              stroke: '#0050db',
-              strokeWidth: 1,
-              parameter1: 4
-            }),
-            // 台数
-            $(
-              go.Panel,
-              'Horizontal',
-              {
-                alignment: go.Spot.Center,
-                margin: new go.Margin(4, 0, 0, 0)
-              },
-              $(
-                go.TextBlock,
-                {
-                  margin: new go.Margin(0, 4, 0, 0),
-                  stroke: 'white',
-                  font: '20px Microsoft YaHei'
-                },
-                new go.Binding(
-                  'text',
-                  '',
-                  (model) => model[model.category].count
-                )
-              )
-            ),
-            // 名称
-            $(
-              go.TextBlock,
-              {
-                font: '13px Microsoft YaHei',
-                width: 80,
-                stroke: '#cecece',
-                textAlign: 'center',
-                maxLines: 4,
-                overflow: go.TextBlock.OverflowEllipsis,
-                toolTip: $(
-                  'ToolTip',
-                  {
-                    'Border.fill': '#021026',
-                    'Border.stroke': '#12409E',
-                    'Border.parameter1': 4
-                  },
-                  $(
-                    go.TextBlock,
-                    { margin: 4, stroke: 'white' },
-                    new go.Binding(
-                      'text',
-                      '',
-                      (model) => model[model.category].name
-                    )
-                  )
-                )
-              },
-              new go.Binding('text', '', (model) => model[model.category].name)
-            )
-          )
-        )
       )
 
       // 设备信息节点模板
@@ -1299,13 +1302,12 @@ export default {
     },
     setDefaultLink() {
       // 连接线默认模板
-      this.diagram.linkTemplate = $(
-        go.Link,
-        {
-          selectable: false,
-          routing: go.Link.Orthogonal
-        },
-        $(go.Shape, { stroke: '#3386FF' })
+      this.diagram.linkTemplate = $(go.Link, {
+        selectable: false,
+        routing: go.Link.Orthogonal
+      }, $(go.Shape, {
+        stroke: '#3386FF'
+      })
       )
     },
     setDevLink() {
